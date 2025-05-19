@@ -1,37 +1,47 @@
-// src/components/Navbar.jsx
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/auth/check-session', { withCredentials: true })
+      .then(res => setUser(res.data.user))
+      .catch(() => setUser(null));
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+      window.location.href = '/login';
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
   return (
-    <nav className="bg-blue-600 text-white p-4 shadow-md">
-      <ul className="flex space-x-4 justify-center">
-        <li>
-          <NavLink to="/employees" className="hover:underline" activeclassname="font-bold">
-            Employee
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/departments" className="hover:underline" activeclassname="font-bold">
-            Department
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/salary" className="hover:underline" activeclassname="font-bold">
-            Salary
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/reports" className="hover:underline" activeclassname="font-bold">
-            Reports
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/" className="hover:underline text-red-200">
-            Logout
-          </NavLink>
-        </li>
-      </ul>
+    <nav className="bg-white shadow px-6 py-3 flex justify-between">
+      <div className="space-x-4">
+        <Link to="/">Home</Link>
+        <Link to="/employees">Employees</Link>
+        <Link to="/salary">Salaries</Link>
+        {user?.role === 'admin' && <Link to="/departments">Departments</Link>}
+        <Link to="/reports">Reports</Link>
+      </div>
+
+      <div>
+        {user ? (
+          <>
+            <span className="mr-4">{user.username} ({user.role})</span>
+            <button onClick={handleLogout} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link to="/login">Login</Link>
+        )}
+      </div>
     </nav>
   );
 };

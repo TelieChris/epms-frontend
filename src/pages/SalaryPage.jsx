@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axiosConfig';
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://localhost:5000';
 
 const SalaryPage = () => {
   const [salaryRecords, setSalaryRecords] = useState([]);
@@ -20,9 +22,9 @@ const SalaryPage = () => {
     const fetchData = async () => {
       try {
         const [empRes, deptRes, salRes] = await Promise.all([
-          axios.get('/employees'),
-          axios.get('/departments'),
-          axios.get('/salaries'),
+          axios.get('/api/employees'),
+          axios.get('/api/departments'),
+          axios.get('/api/salaries'),
         ]);
         setEmployees(empRes.data);
         setDepartments(deptRes.data);
@@ -64,7 +66,7 @@ const SalaryPage = () => {
     };
 
     try {
-      await axios.post('/salaries', payload);
+      await axios.post('/api/salaries', payload);
       alert('Salary recorded successfully');
       setFormData({
         employeeNumber: '',
@@ -74,7 +76,7 @@ const SalaryPage = () => {
       });
       setGrossSalary(0);
       setNetSalary(0);
-      const res = await axios.get('/salaries');
+      const res = await axios.get('/api/salaries');
       setSalaryRecords(res.data);
     } catch (error) {
       console.error('Failed to save salary:', error);

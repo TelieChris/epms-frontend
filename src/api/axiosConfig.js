@@ -6,6 +6,9 @@ const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  
 });
+axios.defaults.withCredentials = true; // very important for sessions
+
 
 export default axiosInstance;

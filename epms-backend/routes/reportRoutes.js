@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db'); // adjust path as needed
+const db = require('../db');
 
-// GET /api/reports?month=May 2025
+// GET /api/reports?month=2025-05
 router.get('/', (req, res) => {
   const { month } = req.query;
 
@@ -19,12 +19,11 @@ router.get('/', (req, res) => {
     JOIN department d ON e.departmentCode = d.departmentCode
   `;
 
-  // Add filter if month is provided
   if (month) {
     query += ` WHERE s.month = ?`;
   }
 
-  query += ' ORDER BY s.month DESC';
+  query += ` ORDER BY s.month DESC`;
 
   db.query(query, month ? [month] : [], (err, results) => {
     if (err) {

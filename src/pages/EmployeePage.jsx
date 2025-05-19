@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axiosConfig';
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://localhost:5000';
 
 const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
@@ -25,7 +27,7 @@ const EmployeePage = () => {
   const fetchEmployees = () => {
     setLoading(true);
     axios
-      .get('/employees')
+      .get('/api/employees')
       .then((res) => {
         setEmployees(res.data);
         setLoading(false);
@@ -45,7 +47,7 @@ const EmployeePage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post('/employees', formData)
+      .post('/api/employees', formData)
       .then((res) => {
         alert('Employee added successfully!');
         setFormData({
