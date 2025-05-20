@@ -14,9 +14,17 @@ router.post('/login', (req, res) => {
     const user = results[0];
     bcrypt.compare(password, user.password, (err, match) => {
       if (err || !match) return res.status(401).json({ error: 'Invalid credentials' });
-
+      // Set session
       req.session.user = { id: user.id, username: user.username, role: user.role };
-      return res.send({ message: 'Login successful', user: req.session.user });
+      // Set cookie
+      res.cookie('user_sid', req.session.id, {
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      });
+      // Send response
+      return res.status(200).json({ message: 'Login successful', user: req.session.user });
     });
   });
 });

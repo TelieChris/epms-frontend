@@ -12,8 +12,12 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', { username, password }, { withCredentials: true });
-      alert(res.data.message);
-      navigate('/');
+      if (res.status === 200) {
+        // Store user data in local storage or context
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        // Redirect to Home page
+        navigate('/');
+      }
     } catch (err) {
       alert('Login failed: ' + (err.response?.data?.error || 'Server error'));
     }

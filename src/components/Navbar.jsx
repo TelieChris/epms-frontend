@@ -23,11 +23,18 @@ const Navbar = () => {
   return (
     <nav className="bg-white shadow px-6 py-3 flex justify-between">
       <div className="space-x-4">
-        <Link to="/">Home</Link>
-        <Link to="/employees">Employees</Link>
-        <Link to="/salary">Salaries</Link>
-        {user?.role === 'admin' && <Link to="/departments">Departments</Link>}
-        <Link to="/reports">Reports</Link>
+      {user ? (
+          <>
+            <Link to="/">Home</Link>
+          </>
+        ) : (
+          <Link to="/login"></Link>
+        )}
+       
+      {user?.role === 'admin' && <Link to="/employees">Employees</Link>}
+      {user?.role === 'user' &&  <Link to="/salary">Salaries</Link>}
+      {user?.role === 'admin' && <Link to="/departments">Departments</Link>}
+      <Link to="/reports">Reports</Link>
       </div>
 
       <div>

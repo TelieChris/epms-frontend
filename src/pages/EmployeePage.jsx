@@ -6,6 +6,14 @@ axios.defaults.baseURL = 'http://localhost:5000';
 const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [departments, setDepartments] = useState([]);
+
+  const fetchDepartments = () => {
+    axios
+      .get('/api/departments')
+      .then((res) => setDepartments(res.data))
+      .catch((err) => console.error('Failed to load departments', err));
+  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -22,6 +30,7 @@ const EmployeePage = () => {
   // Fetch employees
   useEffect(() => {
     fetchEmployees();
+    fetchDepartments();
   }, []);
 
   const fetchEmployees = () => {
@@ -136,15 +145,21 @@ const EmployeePage = () => {
           required
           className="border rounded px-3 py-2"
         />
-        <input
-          type="text"
+        <select
           name="departmentCode"
-          placeholder="Department Code"
           value={formData.departmentCode}
           onChange={handleChange}
           required
           className="border rounded px-3 py-2"
-        />
+        >
+          <option value="">Select Department</option>
+          {departments.map((dept) => (
+            <option key={dept.departmentCode} value={dept.departmentCode}>
+              {dept.departmentName} ({dept.departmentCode})
+            </option>
+          ))}
+        </select>
+
         <button
           type="submit"
           className="bg-blue-600 text-white rounded px-4 py-2 col-span-full md:col-auto hover:bg-blue-700"

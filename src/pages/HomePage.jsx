@@ -17,30 +17,42 @@ const HomePage = () => {
 
   const [departmentData, setDepartmentData] = useState([]);
 
-useEffect(() => {
-  const fetchStats = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/api/stats', { withCredentials: true });
-      setStats(res.data);
-    } catch (err) {
-      console.error('Failed to load stats', err);
+  useEffect(() => {
+    // Prevent infinite reload loop using sessionStorage
+    const hasReloaded = sessionStorage.getItem('hasReloaded');
+    if (!hasReloaded) {
+      sessionStorage.setItem('hasReloaded', 'true');
+      window.location.reload(); // Force full browser reload
+      return; // Stop executing below
     }
-  };
 
-  const fetchDepartmentDistribution = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/api/stats/department-distribution', { withCredentials: true });
-      setDepartmentData(res.data);
-    } catch (err) {
-      console.error('Failed to fetch department data', err);
-    }
-  };
+    // Clear flag so it can reload again on next navigation
+    sessionStorage.removeItem('hasReloaded');
 
-  fetchStats();
-  fetchDepartmentDistribution();
-}, []);
+    // Now fetch data
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/stats', { withCredentials: true });
+        setStats(res.data);
+      } catch (err) {
+        console.error('Failed to load stats', err);
+      }
+    };
 
-const pieData = {
+    const fetchDepartmentDistribution = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/stats/department-distribution', { withCredentials: true });
+        setDepartmentData(res.data);
+      } catch (err) {
+        console.error('Failed to fetch department data', err);
+      }
+    };
+
+    fetchStats();
+    fetchDepartmentDistribution();
+  }, []);
+
+  const pieData = {
     labels: departmentData.map(item => item.department),
     datasets: [
       {
@@ -55,7 +67,15 @@ const pieData = {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-4">Welcome, {user?.username}!</h1>
       <p className="text-gray-700 mb-6">Role: <span className="font-semibold">{user?.role}</span></p>
-
+      <div className="bg-white p-6 rounded-lg shadow mb-8 flex justify-between items-center">
+      {user?.role === 'admin' && <Link
+            to="/register"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
+          >
+            Create New User
+          </Link>}
+        </div>
+      
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">

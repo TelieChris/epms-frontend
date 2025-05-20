@@ -69,12 +69,12 @@ const ReportsPage = () => {
       </div>
 
       <div className="overflow-x-auto">
-      <div className="mb-6 flex gap-4">
-      <button onClick={exportToExcel} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-        Export Excel
-      </button>
-      <Link to='/register'>Create new User</Link>
-      </div>
+        <div className="mb-6 flex gap-4">
+          <button onClick={exportToExcel} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            Export Excel
+          </button>
+      
+        </div>
         <table className="min-w-full bg-white shadow-md rounded">
           <thead className="bg-gray-100">
             <tr>
