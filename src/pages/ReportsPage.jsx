@@ -93,7 +93,7 @@ const ReportsPage = () => {
                   <td className="px-4 py-2">{s.position}</td>
                   <td className="px-4 py-2">{s.departmentName}</td>
                   <td className="px-4 py-2">{formatMonth(s.month)}</td>
-                  <td className="px-4 py-2">{s.netSalary.toLocaleString()}</td>
+                  <td className="px-4 py-2">{s.netSalary}</td>
                 </tr>
               ))
             ) : (

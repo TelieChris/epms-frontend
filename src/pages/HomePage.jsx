@@ -30,18 +30,30 @@ const HomePage = () => {
     const fetchStats = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/stats', { withCredentials: true });
-        setStats(res.data);
+        // Ensure we have default values if any stat is null
+        setStats({
+          employee: res.data.employee || 0,
+          department: res.data.department || 0,
+          totalSalary: res.data.totalSalary || 0,
+        });
       } catch (err) {
         console.error('Failed to load stats', err);
+        // Set default values in case of error
+        setStats({
+          employee: 0,
+          department: 0,
+          totalSalary: 0,
+        });
       }
     };
 
     const fetchDepartmentDistribution = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/stats/department-distribution', { withCredentials: true });
-        setDepartmentData(res.data);
+        setDepartmentData(res.data || []);
       } catch (err) {
         console.error('Failed to fetch department data', err);
+        setDepartmentData([]);
       }
     };
 
@@ -58,6 +70,11 @@ const HomePage = () => {
         backgroundColor: ['#60a5fa', '#34d399', '#facc15', '#f472b6', '#a78bfa', '#fb923c'],
       },
     ],
+  };
+
+  // Format number with commas and handle null/undefined values
+  const formatNumber = (number) => {
+    return (number || 0).toLocaleString();
   };
 
   return (
@@ -99,7 +116,7 @@ const HomePage = () => {
               </div>
               <div>
                 <p className="text-gray-500 text-sm">Total Employees</p>
-                <h3 className="text-2xl font-bold text-gray-800">{stats.employee}</h3>
+                <h3 className="text-2xl font-bold text-gray-800">{formatNumber(stats.employee)}</h3>
               </div>
             </div>
           </div>
@@ -113,7 +130,7 @@ const HomePage = () => {
               </div>
               <div>
                 <p className="text-gray-500 text-sm">Departments</p>
-                <h3 className="text-2xl font-bold text-gray-800">{stats.department}</h3>
+                <h3 className="text-2xl font-bold text-gray-800">{formatNumber(stats.department)}</h3>
               </div>
             </div>
           </div>
@@ -128,7 +145,7 @@ const HomePage = () => {
               </div>
               <div>
                 <p className="text-gray-500 text-sm">Total Salary</p>
-                <h3 className="text-2xl font-bold text-gray-800">Frw {stats.totalSalary.toLocaleString()}</h3>
+                <h3 className="text-2xl font-bold text-gray-800">Frw {formatNumber(stats.totalSalary)}</h3>
               </div>
             </div>
           </div>
@@ -197,6 +214,19 @@ const HomePage = () => {
             </div>
           </div>
 
+          {/* Department Distribution Chart */}
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <h2 className="text-xl font-bold mb-4 text-gray-800">Department Distribution</h2>
+            <div className="aspect-square">
+              {departmentData.length > 0 ? (
+                <Pie data={pieData} options={{ maintainAspectRatio: true }} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  No department data available
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Announcements Section */}
