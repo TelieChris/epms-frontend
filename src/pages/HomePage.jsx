@@ -93,10 +93,10 @@ const HomePage = () => {
       </div>
 
       {/* Charts */}
-      <div className="max-w-xs mx-auto m-4">
+      {/* <div className="max-w-xs mx-auto m-4">
         <h2 className="text-xl font-bold mb-4">Employees by Department</h2>
         <Pie data={pieData} width={50} height={50} />
-      </div>
+      </div> */}
 
       {/* Quick Access Links */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
