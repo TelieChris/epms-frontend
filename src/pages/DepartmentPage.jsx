@@ -5,6 +5,8 @@ axios.defaults.baseURL = 'http://localhost:5000';
 
 const DepartmentPage = () => {
   const [departments, setDepartments] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [formData, setFormData] = useState({
     departmentCode: '',
     departmentName: '',
@@ -34,7 +36,43 @@ const DepartmentPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
+  // Handle edit department
+  const handleEdit = (department) => {
+    setEditMode(true);
+    setSelectedDepartment(department);
+    setFormData({
+      departmentCode: department.departmentCode,
+      departmentName: department.departmentName,
+      grossSalary: department.grossSalary,
+    });
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setSelectedDepartment(null);
+    setFormData({
+      departmentCode: '',
+      departmentName: '',
+      grossSalary: '',
+    });
+  };
+
+  // Handle delete department
+  const handleDelete = async (departmentCode) => {
+    if (window.confirm('Are you sure you want to delete this department?')) {
+      try {
+        await axios.delete(`/api/departments/${departmentCode}`);
+        alert('Department deleted successfully!');
+        fetchDepartments();
+      } catch (error) {
+        console.error('Failed to delete department:', error);
+        alert('Failed to delete department');
+      }
+    }
+  };
+
+  // Handle form submission (Create or Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { departmentCode, departmentName, grossSalary } = formData;
@@ -45,13 +83,22 @@ const DepartmentPage = () => {
     }
 
     try {
-      await axios.post('/api/departments', formData);
-      alert('Department added successfully!');
+      if (editMode) {
+        // Update existing department
+        await axios.put(`/api/departments/${selectedDepartment.departmentCode}`, formData);
+        alert('Department updated successfully!');
+        setEditMode(false);
+        setSelectedDepartment(null);
+      } else {
+        // Create new department
+        await axios.post('/api/departments', formData);
+        alert('Department added successfully!');
+      }
       setFormData({ departmentCode: '', departmentName: '', grossSalary: '' });
       fetchDepartments();
     } catch (error) {
-      console.error('Failed to add department:', error);
-      alert('Failed to add department');
+      console.error(editMode ? 'Failed to update department:' : 'Failed to add department:', error);
+      alert(editMode ? 'Failed to update department' : 'Failed to add department');
     }
   };
 
@@ -68,6 +115,7 @@ const DepartmentPage = () => {
           onChange={handleChange}
           className="border p-2 rounded"
           required
+          disabled={editMode}
         />
         <input
           type="text"
@@ -88,12 +136,23 @@ const DepartmentPage = () => {
           min="0"
           required
         />
-        <button
-          type="submit"
-          className="md:col-span-3 bg-green-600 text-white p-2 rounded hover:bg-green-700"
-        >
-          Add Department
-        </button>
+        <div className="md:col-span-3 flex gap-2 justify-center">
+          <button
+            type="submit"
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            {editMode ? 'Update Department' : 'Add Department'}
+          </button>
+          {editMode && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       <h2 className="text-2xl font-semibold mb-4">Existing Departments</h2>
@@ -107,6 +166,7 @@ const DepartmentPage = () => {
               <th className="border px-4 py-2">Code</th>
               <th className="border px-4 py-2">Name</th>
               <th className="border px-4 py-2">Gross Salary</th>
+              <th className="border px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -115,6 +175,22 @@ const DepartmentPage = () => {
                 <td className="border px-4 py-2">{dept.departmentCode}</td>
                 <td className="border px-4 py-2">{dept.departmentName}</td>
                 <td className="border px-4 py-2">{dept.grossSalary}</td>
+                <td className="border px-4 py-2">
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => handleEdit(dept)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(dept.departmentCode)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

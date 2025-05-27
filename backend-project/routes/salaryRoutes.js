@@ -46,4 +46,51 @@ router.get('/', (req, res) => {
   });
 });
 
+// Update salary record
+router.put('/:id', (req, res) => {
+  const id = req.params.id;
+  const { employeeNumber, grossSalary, totalDeduction, netSalary, month } = req.body;
+
+  const query = `
+    UPDATE salary 
+    SET employeeNumber = ?, grossSalary = ?, totalDeduction = ?, netSalary = ?, month = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    query,
+    [employeeNumber, grossSalary, totalDeduction, netSalary, month, id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating salary record:', err);
+        return res.status(500).json({ error: 'Failed to update salary record' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Salary record not found' });
+      }
+
+      res.json({ message: 'Salary record updated successfully' });
+    }
+  );
+});
+
+// Delete salary record
+router.delete('/:id', (req, res) => {
+  const id = req.params.id;
+
+  db.query('DELETE FROM salary WHERE id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting salary record:', err);
+      return res.status(500).json({ error: 'Failed to delete salary record' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Salary record not found' });
+    }
+
+    res.json({ message: 'Salary record deleted successfully' });
+  });
+});
+
 module.exports = router;

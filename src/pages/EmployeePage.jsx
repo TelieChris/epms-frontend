@@ -7,6 +7,8 @@ const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [departments, setDepartments] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const fetchDepartments = () => {
     axios
@@ -52,34 +54,111 @@ const EmployeePage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submit
+  // Handle edit employee
+  const handleEdit = (employee) => {
+    setEditMode(true);
+    setSelectedEmployee(employee);
+    setFormData({
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      position: employee.position,
+      address: employee.address,
+      telephone: employee.telephone,
+      gender: employee.gender,
+      hiredDate: employee.hiredDate,
+      departmentCode: employee.departmentCode,
+    });
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setSelectedEmployee(null);
+    setFormData({
+      firstName: '',
+      lastName: '',
+      position: '',
+      address: '',
+      telephone: '',
+      gender: 'Male',
+      hiredDate: '',
+      departmentCode: '',
+    });
+  };
+
+  // Handle delete employee
+  const handleDelete = (employeeNumber) => {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
+      axios
+        .delete(`/api/employees/${employeeNumber}`)
+        .then(() => {
+          alert('Employee deleted successfully!');
+          fetchEmployees();
+        })
+        .catch((err) => {
+          console.error(err);
+          alert('Failed to delete employee');
+        });
+    }
+  };
+
+  // Handle form submit (Create or Update)
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .post('/api/employees', formData)
-      .then((res) => {
-        alert('Employee added successfully!');
-        setFormData({
-          firstName: '',
-          lastName: '',
-          position: '',
-          address: '',
-          telephone: '',
-          gender: 'Male',
-          hiredDate: '',
-          departmentCode: '',
+    if (editMode) {
+      // Update existing employee
+      axios
+        .put(`/api/employees/${selectedEmployee.employeeNumber}`, formData)
+        .then(() => {
+          alert('Employee updated successfully!');
+          setEditMode(false);
+          setSelectedEmployee(null);
+          setFormData({
+            firstName: '',
+            lastName: '',
+            position: '',
+            address: '',
+            telephone: '',
+            gender: 'Male',
+            hiredDate: '',
+            departmentCode: '',
+          });
+          fetchEmployees();
+        })
+        .catch((err) => {
+          console.error(err);
+          alert('Failed to update employee');
         });
-        fetchEmployees();
-      })
-      .catch((err) => {
-        console.error(err);
-        alert('Failed to add employee');
-      });
+    } else {
+      // Create new employee
+      axios
+        .post('/api/employees', formData)
+        .then(() => {
+          alert('Employee added successfully!');
+          setFormData({
+            firstName: '',
+            lastName: '',
+            position: '',
+            address: '',
+            telephone: '',
+            gender: 'Male',
+            hiredDate: '',
+            departmentCode: '',
+          });
+          fetchEmployees();
+        })
+        .catch((err) => {
+          console.error(err);
+          alert('Failed to add employee');
+        });
+    }
   };
 
   return (
     <div className="p-4 max-w-5xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">Add New Employee</h2>
+      <h2 className="text-3xl font-bold mb-6">
+        {editMode ? 'Edit Employee' : 'Add New Employee'}
+      </h2>
 
       <form onSubmit={handleSubmit} className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
@@ -160,12 +239,23 @@ const EmployeePage = () => {
           ))}
         </select>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white rounded px-4 py-2 col-span-full md:col-auto hover:bg-blue-700"
-        >
-          Add Employee
-        </button>
+        <div className="col-span-full md:col-auto flex gap-2">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
+          >
+            {editMode ? 'Update Employee' : 'Add Employee'}
+          </button>
+          {editMode && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="bg-gray-500 text-white rounded px-4 py-2 hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       <h2 className="text-2xl font-bold mb-4">Employees List</h2>
@@ -180,6 +270,7 @@ const EmployeePage = () => {
               <th className="border border-gray-300 px-4 py-2">Last Name</th>
               <th className="border border-gray-300 px-4 py-2">Position</th>
               <th className="border border-gray-300 px-4 py-2">Department</th>
+              <th className="border border-gray-300 px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -190,6 +281,22 @@ const EmployeePage = () => {
                 <td className="border border-gray-300 px-4 py-2">{emp.lastName}</td>
                 <td className="border border-gray-300 px-4 py-2">{emp.position}</td>
                 <td className="border border-gray-300 px-4 py-2">{emp.departmentCode}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => handleEdit(emp)}
+                      className="bg-yellow-500 text-white rounded px-3 py-1 hover:bg-yellow-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(emp.employeeNumber)}
+                      className="bg-red-500 text-white rounded px-3 py-1 hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
